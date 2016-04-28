@@ -8,7 +8,7 @@ def sigmoid(x):
 
 # derivative of sigmoid function
 def sigmoid_p(x):
-    return sigmoid(x)*(1-sigmoid(x))
+    return x*(1-x)
 
 class NN(object):
     def __init__(self):
@@ -16,8 +16,8 @@ class NN(object):
         self.hiddensize = 8 
         self.inputsize = 3
         # initialize weights and bias to a mean of 0
-        self.w0 = 2*np.random.random((self.inputsize+1,self.hiddensize)) - 1
-        self.w1 = 2*np.random.random((self.hiddensize,1)) - 1
+        self.w0 = 2*np.random.random((self.inputsize+1,self.hiddensize+1)) - 1
+        self.w1 = 2*np.random.random((self.hiddensize+1,1)) - 1
         # self.b1 = np.zeros((1, self.hiddensize))
         # self.b2 = np.zeros((1, self.inputsize))
 
@@ -25,7 +25,8 @@ class NN(object):
     def _forward_pass(self, X):
         a = []
         a.append(sigmoid(np.dot(X, self.w0)))
-        [np.insert(i,0,1) for i in a] 
+        # add bias to outer layer
+        # a[0] = np.array([np.insert(i,0,1) for i in a[0]])
         a.append(sigmoid(np.dot(a[0], self.w1)))
         # a.append(sigmoid(np.dot(X, self.w0)))
         # a.append(sigmoid(np.dot(a[0], self.w1)))
@@ -60,10 +61,15 @@ class NN(object):
         # inputs are a tuple ([TVi, TVe, e-time], [dbl, bs, co, su])
         # for now it's just 0 or 1, normal or flow async
         inputs = [ ([563, 566, 5.2], 0), ([492, 523, 6.54], 0), ([487, 602, 7.08], 0), ([553,589,6.22], 0), ([72, 209, 3.02], 1), ([109, 12, 0.18], 1), ([652, 691, 4.18], 0),([300, 596, 4.66], 0),([211, 28, 0.24], 1),([802, 687, 1.38], 1),([875, 550, 2.42], 1) ]
+        # just take x_inputs in the tuple
         x_input = [x[0] for x in inputs]
-        [x.insert(0,1) for x in x_input]
+        # insert a 1 in front of all x_inputs to act as bias vector
+        [x.append(1) for x in x_input]
+        # move x_input to a numpy array
         x_input = np.array(x_input)
+        # isolate the y variables from the tuple
         y_input = [[x[1]] for x in inputs]
+        # loop for backpropagation
         for i in range(100000):
             self._backprop(x_input, y_input, i)
 
@@ -74,11 +80,11 @@ class NN(object):
 def main():
     nn = NN()
     nn.train()
-    print(nn.predict([1,527,543,4.72]))
-    print(nn.predict([1,166,360,1.72]))
-    print(nn.predict([1,205,422,2.44]))
-    print(nn.predict([1,308, 6, 0.18]))
-    print(nn.predict([1,167, 524, 1.94]))
+    print(nn.predict([527,543,4.98,1]))
+    print(nn.predict([166,360,1.72,1]))
+    print(nn.predict([205,422,2.44,1]))
+    print(nn.predict([308, 6, 0.18,1]))
+    print(nn.predict([167, 524, 1.94,1]))
 
 if __name__ == '__main__':
     main()
