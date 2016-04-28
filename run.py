@@ -12,41 +12,73 @@ def sigmoid_p(x):
 
 class NN(object):
     def __init__(self):
-        self.alpha = 0.1
-        self.hiddensize = 32
-        self.inputsize = 4
+        self.alpha = 0.01
+        self.hiddensize = 4
+        self.inputsize = 3
         # initialize weights and bias to a mean of 0
         self.w0 = 2*np.random.random((self.inputsize,self.hiddensize)) - 1
         self.w1 = 2*np.random.random((self.hiddensize,1)) - 1
-        self.b = 2*np.random.random((self.inputsize,1)) - 1
+        self.b1 = 2*np.random.random((1,self.hiddensize)) - 1
+        self.b2 = 2*np.random.random((1,self.inputsize)) - 1
 
 
     def _forward_pass(self, X):
-        l1 = sigmoid(np.dot(X, self.w0) + self.b)
-        l2 = sigmoid(np.dot(l1, self.w1) + self.b)
-        return l1, l2
+        a = []
+        # a.append(sigmoid(np.dot(X, self.w0) + self.b1))
+        # a.append(sigmoid(np.dot(a[0], self.w1) + self.b2))
+        a.append(sigmoid(np.dot(X, self.w0)))
+        a.append(sigmoid(np.dot(a[0], self.w1)))
+        return a
 
 
-    def _backprop(self, X, y):
+    def _backprop(self, X, y, j):
         # set hidden and output layer
-        h, o = self._forward_pass(X)
+        a = self._forward_pass(X)
+        h = a[0]
+        o = a[1]
         # output layer error equals output-output layer
         o_e = y-o
+        if (j % 10000) == 0:
+            print(np.mean(np.abs(o_e)))
         # output error delta is equal to the error * the derivative of the
         # logicistic function(sigmoid) of output layer array
         o_d = o_e*sigmoid_p(o)
+        # o_d = np.sum(o_d)
         # hidden layer error equals matrix multiplication of output delta and
         # transposition of w1
-        h_e = np.dot(o_d, w1.T)
+        h_e = np.dot(o_d, self.w1.T)
         # hidden error delta is equal to the error * the derivative of the
         # logicistic function(sigmoid) of hidden layer array
         h_d = h_e*sigmoid_p(h)
+        # h_d = np.sum(h_d)
         # update bias and weights
-        self.b = o_d
+        # self.b1 += o_d
+        # self.b2 += h_d
         self.w1 += self.alpha * np.dot(h.T, o_d)
-        self.w1 += self.alpha * np.dot(o.T, h_d)
+        self.w0 += self.alpha * np.dot(X.T, h_d)
 
-    def train(self, inputs):
+    def train(self):
+        # inputs are from file 0017_02_55_40_1_300to600_kuhn_dbl_bs_cosuvd.csv
+        # inputs are a tuple ([TVi, TVe, e-time], [dbl, bs, co, su])
+        # for now it's just 0 or 1, normal or flow async
+        inputs = [ ([563, 566, 5.2], 0), ([492, 523, 6.54], 0), ([487, 602, 7.08], 0), ([553,589,6.22], 0), ([72, 209, 3.02], 1), ([109, 12, 0.18], 1), ([652, 691, 4.18], 0),([300, 596, 4.66], 0),([211, 28, 0.24], 1),([802, 687, 1.38], 1),([875, 550, 2.42], 1) ]
+        x_input = np.array([x[0] for x in inputs])
+        y_input = [[x[1]] for x in inputs]
+        for i in range(200000):
+            self._backprop(x_input, y_input, i)
 
+    def predict(self, x):
+        a = self._forward_pass(x)
+        return a[-1]
 
+def main():
+    nn = NN()
+    nn.train()
+    print(nn.predict([527,543,4.72]))
+    print(nn.predict([166,360,1.72]))
+    print(nn.predict([205,422,2.44]))
+    print(nn.predict([308, 6, 0.18]))
+    print(nn.predict([167, 524, 1.94]))
 
+if __name__ == '__main__':
+    main()
