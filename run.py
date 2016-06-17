@@ -1,8 +1,8 @@
 import numpy as np
 import math
-import simplejson
 import matplotlib
 matplotlib.use("TkAgg")
+import simplejson as json
 import matplotlib.pyplot as plt
 
 
@@ -22,31 +22,31 @@ class NN(object):
         self.hiddensize = 4
         self.inputsize = 4
         # initialize weights and bias to a mean of 0
-        self.w0 = 2*np.random.random((self.inputsize+1,self.hiddensize)) - 1
-        self.w1 = 2*np.random.random((self.hiddensize+1,1)) - 1
-        # self.b1 = np.zeros((1, self.hiddensize))
-        # self.b2 = np.zeros((1, self.inputsize))
+        self.w0 = 2*np.random.random((self.inputsize, self.hiddensize)) - 1
+        self.w1 = 2*np.random.random((self.hiddensize, 1)) - 1
+        self.b1 = np.zeros((1, self.hiddensize))
+        self.b2 = np.zeros((1, 1))
 
 
     def _forward_pass(self, X):
-        a = []
         # try:
-        a.append(sigmoid(np.dot(X, self.w0)))
+        #
+        a = sigmoid(X.dot(self.w0) + self.b1)
+        b = sigmoid(a.dot(self.w1) + self.b2)
+        # a.append(sigmoid(np.dot(X, self.w0)+self.b1))
             # add bias to outer layer
         # a[0] = np.array([np.insert(i,0,1) for i in a[0]])
-        a[0] = np.array([np.append(i,1) for i in a[0]])
+        # a[0] = np.array([np.append(i,1) for i in a[0]])
         # except ValueError:
             # print(X)
-        a.append(sigmoid(np.dot(a[0], self.w1)))
-        # a.append(sigmoid(np.dot(X, self.w0)))
         # a.append(sigmoid(np.dot(a[0], self.w1)))
-        return a
+        # a.append(sigmoid(np.dot(X, self.w0)))
+        return a,b
 
 
     def _backprop(self, X, y, j):
         # set hidden and output layer
-        a = self._forward_pass(X)
-        h,o = a[0], a[1]
+        h,o = self._forward_pass(X)
         # output layer error equals output-output layer
         o_e = y-o
         if (j % 10000) == 0:
@@ -55,15 +55,15 @@ class NN(object):
         # logicistic function(sigmoid) of output layer array
         o_d = o_e*sigmoid_p(o)
         # hidden layer error equals matrix multiplication of output delta and
-        # transposition of w1
-        h_e = np.dot(o_d, self.w1.T)
+        # transpose of w1
+        h_e = o_d.dot(self.w1.T)
         # hidden error delta is equal to the error * the derivative of the
         # logicistic function(sigmoid) of hidden layer array
         h_d = h_e*sigmoid_p(h)
-        h_d = [i[:-1] for i in h_d]
+        # h_d = [i[:-1] for i in h_d]
         # update bias and weights
-        # self.b1 += self.alpha * np.sum(o_d, axis=0)
-        # self.b2 += self.alpha * np.sum(h_d, axis=0)
+        self.b1 += self.alpha * np.sum(h_d, axis=0)
+        self.b2 += self.alpha * np.sum(o_d, axis=0)
         self.w1 += self.alpha * np.dot(h.T, o_d)
         self.w0 += self.alpha * np.dot(X.T, h_d)
 
@@ -141,7 +141,7 @@ class NN(object):
         # just take x_inputs in the tuple
         x_input = [x[0] for x in inputs]
         # insert a 1 in front of all x_inputs to act as bias vector
-        [x.append(1) for x in x_input]
+        # [x.append(1) for x in x_input]
         # move x_input to a numpy array
         x_input = np.array(x_input)
         # isolate the y variables from the tuple
@@ -168,10 +168,8 @@ class NN(object):
 
     def train(self,x,y):
         # loop for backpropagation
-        self.w0 = 2*np.random.random((self.inputsize + 1,self.hiddensize)) - 1
-        self.w1 = 2*np.random.random((self.hiddensize + 1,1)) - 1
-        print(x.shape, y.shape)
-        for i in range(1):
+        # print(x.shape, y.shape)
+        for i in range(50000):
             self._backprop(x, y, i)
 
     def predict(self, x):
@@ -186,7 +184,7 @@ class NN(object):
                 "w1": self.w1,
                 "alpha": self.alpha}
         f = open(filename, "w")
-        simplejson.dump(data, f)
+        json.dump(data, f)
         f.close()
 
 
