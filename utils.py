@@ -18,10 +18,9 @@ def score(y,o):
             fn += 1
     pre = tp/(tp+fp)
     re = tp/(tp+fn)
-    se = tp/(tp+fn)
-    accuracy = 2*tp/(2*tp + fp + fn)
+    spe = tn/(tn+fp)
     f1 = 2* ((pre*re)/(pre+re))
-    toprint = (round(pre,3), round(re,3), round(se,3), round(accuracy,3), round(f1,3), tp, tn, fp, fn)
+    toprint = (round(pre,3), round(re,3), round(spe,3), round(f1,3), tp, tn, fp, fn)
     print(toprint)
     return toprint
 
@@ -42,9 +41,9 @@ def preprocess(x,y):
 
 def save_score(filename, scores):
     with open('outputs/'+filename, "w") as f:
-        f.write("pass, precision, recall, sensitivity, accuracy, f1_score, true positive, true negative, false positive, false negative\n")
+        f.write("pass, precision, recall, specificity, f1_score, true positive, true negative, false positive, false negative\n")
         for i, args in enumerate(scores, 1):
-            f.write('{0},{1},{2},{3},{4},{5},{6},{7},{8},{9}\n'.format(i,*args))
+            f.write('{0},{1},{2},{3},{4},{5},{6},{7},{8}\n'.format(i,*args))
 
 
 def sigmoid(x):

@@ -29,7 +29,7 @@ class NN(object):
         # update bias and weights
         hidden, output  = self._forward(X)
         d_o = y - output
-        if (i % 1000) == 0:
+        if (i % 10000) == 0:
             print(np.mean(np.abs(d_o)))
         d_o = d_o * utils.dsigmoid(output)
         d_h = np.dot(d_o, self.w2.T) * utils.dsigmoid(hidden)
@@ -62,7 +62,7 @@ class NN(object):
         self.b = np.zeros((1, self.hidden_size))
         self.w2 = 0.01 * np.random.randn(self.hidden_size, self.output_size)
         self.b2 = np.zeros((1, self.output_size))
-        for i in range(10000):
+        for i in range(50000):
             self._backwards(x, y, i)
 
 
