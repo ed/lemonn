@@ -3,6 +3,9 @@ import numpy as np
 import math
 import uuid
 
+TXT_BEGIN = 4
+TXT_END = 27
+
 def score(y,o):
     tp = fp = fn = tn = 0
     for i,j in zip(y,o):
@@ -31,6 +34,7 @@ def preprocess(x,y):
     start = int(a[1][0])
     end = int(a[-1][0])
     results = []
+    # code to process text file goes here, need to generalize it
     for i,j in zip(range(start, end), range(1,len(a))):
         results.append((b[i, [x for x in range(4,27) if x!= 19]], sum(a[j, [x for x in range (8,19)]])))
     np.random.shuffle(results)
